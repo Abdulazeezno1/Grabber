@@ -6,14 +6,33 @@ import 'package:grabber/screen/cart_screen.dart';
 import 'package:grabber/widget/catergory.dart';
 import 'package:grabber/widget/fruit.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cartItems = ref.watch(cartProvider);
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
 
+class _HomePageState extends ConsumerState<HomePage> {
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 0.90);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cartItems = ref.watch(cartProvider);
     final totalCount = cartItems.fold(0, (sum, item) => sum + item.quantity);
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -23,133 +42,185 @@ class HomePage extends ConsumerWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return CartScreen();
-                    },
-                  ),
+                  MaterialPageRoute(builder: (context) => CartScreen()),
                 );
               },
-              icon: Icon(Icons.shopping_basket_outlined),
+              icon: const Icon(Icons.shopping_basket_outlined),
             ),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.max,
-          spacing: 12,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
+
+              SizedBox(
+                height: 145,
+                child: PageView(
+                  controller: _pageController,
+                  padEnds: false,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _buildPromoCard(),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _buildImageCard("assets/images/Slider 2.png"),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _buildImageCard("assets/images/Slider 3.png"),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              const SizedBox(height: 100, child: Catergory()),
+
+              const SizedBox(height: 18),
+
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Fruits",
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: const Color(0xFF1E1E1E),
+                      ),
+                    ),
+                    Text(
+                      "See all",
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF0CA201),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              const SizedBox(height: 245, child: Fruit()),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFF0CA201),
+        unselectedItemColor: Colors.black,
+        showUnselectedLabels: true,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border),
+            label: "Favourite",
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: "Profile",
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.menu), label: "Menu"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPromoCard() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        color: const Color(0xFFD7FFD4),
+        padding: const EdgeInsets.fromLTRB(18, 16, 10, 16),
+        child: Row(
           children: [
-            SizedBox(
-              height: 222,
-              width: double.infinity,
-              child: CarouselView.weighted(
-                // itemExtent: 430,
-                flexWeights: const <int>[1, 5, 1],
-                children: [
-                  Container(
-                    height: 222,
-                    width: 430,
-                    decoration: BoxDecoration(color: Color(0xFFD7FFD4)),
-                    child: Stack(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 40, left: 20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 12,
-                            children: [
-                              Text(
-                                "Up to 30% offer",
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              Text(
-                                "Enjoy our big offer",
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: Color(0xFF0CA201),
-                                ),
-                              ),
-                              FilledButton(
-                                onPressed: () {},
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: Color(0xFF0CA201),
-                                  side: BorderSide.none,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Text(
-                                    "Shop Now",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Positioned(
-                          left: 150,
-                          child: Image.asset(
-                            "assets/images/basket.png",
-                            height: 200,
-                            width: 300,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Image.asset(
-                    "assets/images/Slider 2.png",
-                    // height: 200,
-                    width: 300,
-                    fit: BoxFit.cover,
-                  ),
-                  Image.asset(
-                    "assets/images/Slider 3.png",
-                    // height: 200,
-                    width: 300,
-                    fit: BoxFit.cover,
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 100, child: Catergory()),
-
-            Padding(
-              padding: const EdgeInsets.only(right: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Expanded(
+              flex: 5,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Fruits",
-                    style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "See all",
+                    "Up to 30% offer",
                     style: GoogleFonts.inter(
-                      color: Color(0xFF0CA201),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: const Color(0xFF1E1E1E),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "Enjoy our big offer",
+                    style: GoogleFonts.inter(
                       fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                      color: const Color(0xFF0CA201),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    height: 38,
+                    child: FilledButton(
+                      onPressed: () {},
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF0CA201),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                      ),
+                      child: Text(
+                        "Shop Now",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 245, child: Fruit()),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 4,
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Image.asset(
+                  "assets/images/basket.png",
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildImageCard(String imagePath) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
       ),
     );
   }
